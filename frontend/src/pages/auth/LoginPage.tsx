@@ -1,7 +1,8 @@
 import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import Button from "@/components/ui/Button"
 import Input from "@/components/ui/Input"
+import logo from "@/assets/logo.png"
 
 // ─── Icons ───────────────────────────────────────────
 function GoogleIcon() {
@@ -82,9 +83,8 @@ export default function LoginPage() {
 
         <div className="relative z-10 flex flex-col justify-between p-12 text-white">
           {/* Logo */}
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center font-bold text-lg">F</div>
-            <span className="text-xl font-bold tracking-tight">Forgea</span>
+          <div>
+            <img src={logo} alt="Forgea" className="h-10 brightness-0 invert" />
           </div>
 
           {/* Main content */}
@@ -136,9 +136,8 @@ export default function LoginPage() {
       <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white">
         <div className="w-full max-w-sm space-y-6">
           {/* Mobile logo */}
-          <div className="flex items-center gap-2 lg:hidden">
-            <div className="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-white text-sm">F</div>
-            <span className="text-lg font-bold tracking-tight text-gray-900">Forgea</span>
+          <div className="lg:hidden">
+            <img src={logo} alt="Forgea" className="h-9" />
           </div>
 
           {/* Header */}
@@ -248,15 +247,6 @@ export default function LoginPage() {
             )}
           </p>
 
-          {/* Demo link */}
-          <div className="text-center">
-            <Link
-              to="/dashboard"
-              className="text-xs text-gray-400 hover:text-indigo-600 transition-colors"
-            >
-              Explore the demo dashboard →
-            </Link>
-          </div>
         </div>
       </div>
     </div>
