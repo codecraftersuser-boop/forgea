@@ -1,10 +1,10 @@
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 import Button from "@/components/ui/Button"
 import Input from "@/components/ui/Input"
 import logo from "@/assets/logo.png"
+import heroImage from "@/assets/login_image.jpg"
 
-// ─── Icons ───────────────────────────────────────────
 function GoogleIcon() {
   return (
     <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -24,19 +24,16 @@ function GitHubIcon() {
   )
 }
 
-// ─── Bullet check icon ────────────────────────────────
 function CheckIcon() {
   return (
-    <svg className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+    <svg className="w-5 h-5 text-indigo-300 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
     </svg>
   )
 }
 
-// ─── Types ────────────────────────────────────────────
 type Mode = "login" | "register"
 
-// ─── Component ───────────────────────────────────────
 export default function LoginPage() {
   const navigate = useNavigate()
   const [mode, setMode] = useState<Mode>("login")
@@ -64,7 +61,6 @@ export default function LoginPage() {
     const errs = validate()
     if (Object.keys(errs).length) { setErrors(errs); return }
     setLoading(true)
-    // TODO: conectar con Supabase Auth
     await new Promise((r) => setTimeout(r, 1000))
     setLoading(false)
     if (mode === "register") navigate("/onboarding")
@@ -73,22 +69,31 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
-      {/* ── Left: Hero ───────────────────────────────── */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 relative overflow-hidden">
-        {/* Background pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute bottom-0 right-0 w-80 h-80 bg-purple-300 rounded-full translate-x-1/3 translate-y-1/3" />
-        </div>
 
-        <div className="relative z-10 flex flex-col justify-between p-12 text-white">
-          {/* Logo */}
-          <div>
-            <img src={logo} alt="Forgea" className="h-10 brightness-0 invert" />
+      {/* ── LEFT: Hero ───────────────────────────────────── */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 relative overflow-hidden">
+
+        {/* Círculo decorativo inferior derecho */}
+        <div className="absolute bottom-0 right-0 w-80 h-80 bg-purple-300 rounded-full opacity-10 translate-x-1/3 translate-y-1/3 pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col justify-between p-12 text-white w-full">
+
+          {/* Logo + imagen agrupados */}
+          <div className="flex flex-col gap-3">
+            <div className="mb-6">
+              <img src={logo} alt="Forgea" className="h-20 w-auto object-contain" />
+            </div>
+            <div className="w-1/3">
+              <img
+                src={heroImage}
+                alt="Students growing their tech careers"
+                className="w-full h-auto object-contain rounded-xl"
+              />
+            </div>
           </div>
 
-          {/* Main content */}
-          <div className="space-y-8">
+          {/* Texto + bullets + social proof */}
+          <div className="space-y-6">
             <div>
               <h1 className="text-4xl font-bold leading-tight mb-4">
                 Forge real-world<br />experience.
@@ -109,9 +114,8 @@ export default function LoginPage() {
             </div>
 
             {/* Social proof */}
-            <div className="border-t border-white/20 pt-6">
+            <div className="border-t border-white/20 pt-5">
               <div className="flex items-center gap-3 mb-2">
-                {/* Avatars */}
                 <div className="flex -space-x-2">
                   {["bg-pink-400", "bg-yellow-400", "bg-green-400", "bg-blue-400"].map((color, i) => (
                     <div key={i} className={`w-8 h-8 rounded-full border-2 border-indigo-600 ${color}`} />
@@ -128,19 +132,18 @@ export default function LoginPage() {
           </div>
 
           {/* Footer */}
-          <p className="text-xs text-indigo-300">© 2026 Forgea. All rights reserved.</p>
+          <p className="text-xs text-indigo-300 mt-6">© 2026 Forgea. All rights reserved.</p>
         </div>
       </div>
 
-      {/* ── Right: Form ──────────────────────────────── */}
+      {/* ── RIGHT: Form ──────────────────────────────────── */}
       <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white">
         <div className="w-full max-w-sm space-y-6">
-          {/* Mobile logo */}
-          <div className="lg:hidden">
-            <img src={logo} alt="Forgea" className="h-9" />
-          </div>
 
-          {/* Header */}
+          {/* Logo móvil */}
+          <img src={logo} alt="Forgea" className="h-10 w-auto object-contain lg:hidden" />
+
+          {/* Encabezado */}
           <div>
             <h2 className="text-2xl font-bold text-gray-900">
               {mode === "login" ? "Welcome back" : "Create your account"}
@@ -152,7 +155,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Social buttons */}
+          {/* Botones sociales */}
           <div className="grid grid-cols-2 gap-3">
             <Button variant="outline" size="md" className="w-full" type="button">
               <GoogleIcon />
@@ -164,14 +167,14 @@ export default function LoginPage() {
             </Button>
           </div>
 
-          {/* Divider */}
+          {/* Divisor */}
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-gray-200" />
             <span className="text-xs text-gray-400 whitespace-nowrap">or continue with email</span>
             <div className="flex-1 h-px bg-gray-200" />
           </div>
 
-          {/* Form */}
+          {/* Formulario */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "register" && (
               <Input
@@ -190,7 +193,7 @@ export default function LoginPage() {
               label="Email"
               name="email"
               type="email"
-              placeholder="you@university.edu"
+              placeholder="you@email.com"
               value={form.email}
               onChange={handleChange}
               error={errors.email}
@@ -210,9 +213,9 @@ export default function LoginPage() {
               />
               {mode === "login" && (
                 <div className="mt-1.5 text-right">
-                  <a href="#" className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">
+                  <Link to="/forgot-password" className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">
                     Forgot password?
-                  </a>
+                  </Link>
                 </div>
               )}
             </div>
@@ -222,25 +225,19 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          {/* Toggle mode */}
+          {/* Toggle login / register */}
           <p className="text-center text-sm text-gray-500">
             {mode === "login" ? (
               <>
                 New to Forgea?{" "}
-                <button
-                  onClick={() => setMode("register")}
-                  className="text-indigo-600 hover:text-indigo-700 font-medium"
-                >
+                <button onClick={() => setMode("register")} className="text-indigo-600 hover:text-indigo-700 font-medium">
                   Create an account
                 </button>
               </>
             ) : (
               <>
                 Already have an account?{" "}
-                <button
-                  onClick={() => setMode("login")}
-                  className="text-indigo-600 hover:text-indigo-700 font-medium"
-                >
+                <button onClick={() => setMode("login")} className="text-indigo-600 hover:text-indigo-700 font-medium">
                   Sign in
                 </button>
               </>

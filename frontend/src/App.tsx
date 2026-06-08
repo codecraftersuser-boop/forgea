@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 
 // Pages
 import LoginPage from "@/pages/auth/LoginPage"
+import ForgotPasswordPage from "@/pages/auth/ForgotPasswordPage"
 import OnboardingPage from "@/pages/onboarding/OnboardingPage"
 import DashboardPage from "@/pages/dashboard/DashboardPage"
 import RoadmapPage from "@/pages/roadmap/RoadmapPage"
@@ -16,6 +17,7 @@ export default function App() {
       <Routes>
         {/* Auth */}
         <Route path="/" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
 
         {/* App */}
