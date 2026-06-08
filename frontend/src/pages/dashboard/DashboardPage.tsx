@@ -134,7 +134,7 @@ function Sidebar() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-white truncate">Jordan Avery</p>
-            <p className="text-xs text-gray-500 truncate">Final-year CS Student</p>
+            <p className="text-xs text-gray-500 truncate">Data Engineer</p>
           </div>
           <button className="text-gray-500 hover:text-gray-300">
             <LogoutIcon />
@@ -161,30 +161,30 @@ export default function DashboardPage() {
             <p className="text-xs text-gray-500">Here's your career progress today</p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="relative">
+            <div className="relative hidden sm:block">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
                 <SearchIcon />
               </span>
               <input
                 type="text"
                 placeholder="Search courses, projects..."
-                className="pl-9 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg w-56 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+                className="pl-9 pr-4 py-1.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 w-56"
               />
             </div>
-            <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
+            <div className="relative">
               <BellOutlineIcon />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-indigo-600 rounded-full" />
-            </button>
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full" />
+            </div>
             <Link
               to="/projects/new"
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm"
+              className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-3 py-1.5 rounded-lg transition-colors"
             >
               <PlusIcon />
               New Project
             </Link>
-            <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-bold cursor-pointer">
+            <Link to="/profile" className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 hover:ring-2 hover:ring-indigo-300 transition-all">
               JA
-            </div>
+            </Link>
           </div>
         </div>
 
@@ -327,9 +327,9 @@ export default function DashboardPage() {
                 ].map((p) => (
                   <div key={p.name} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3">
                     <div className="flex items-center justify-between">
-                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-600">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2.5 py-0.5 rounded-full">
                         <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
-                        Recruiting
+                        {p.status ?? "Recruiting"}
                       </span>
                       <span className="text-xs text-gray-400 font-medium">{p.type}</span>
                     </div>
@@ -412,9 +412,9 @@ export default function DashboardPage() {
               ))}
             </div>
 
-            <button className="w-full border border-gray-200 text-sm text-gray-600 font-medium py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <Link to="/roadmap" className="w-full border border-gray-200 text-sm text-gray-600 font-medium py-2 rounded-lg hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-300 transition-colors text-center block">
               View full roadmap
-            </button>
+            </Link>
 
           </div>{/* end bg-white skills section */}
           </div>{/* end rounded-xl Your Path card */}
