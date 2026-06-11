@@ -36,6 +36,17 @@ def _load_project(db: Session, project_id: int) -> Project:
     return project
 
 
+def _team_count(project: Project) -> int:
+    """Members + owner (if the owner isn't already in the members list)."""
+    owner_in_members = any(m.user_id == project.owner_id for m in project.members)
+    return len(project.members) + (0 if owner_in_members else 1)
+
+
+def _ensure_team_not_full(project: Project) -> None:
+    if _team_count(project) >= project.team_size:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Team is full")
+
+
 def _project_out(project: Project) -> dict:
     return {
         "id": project.id,
@@ -157,6 +168,8 @@ def apply_to_project(
     if already_member:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Already a member of this project")
 
+    _ensure_team_not_full(project)
+
     role = db.get(ProjectRole, body.role_id)
     if not role or role.project_id != project_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Role not found")
@@ -195,6 +208,8 @@ def accept_application(
     if already_member:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User is already a member")
 
+    _ensure_team_not_full(project)
+
     role = db.get(ProjectRole, body.role_id)
     if not role or role.project_id != project_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Role not found")
@@ -226,6 +241,8 @@ def accept_invite(
     already_member = any(m.user_id == current_user.id for m in project.members)
     if already_member:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Already a member of this project")
+
+    _ensure_team_not_full(project)
 
     role = db.get(ProjectRole, body.role_id)
     if not role or role.project_id != project_id:
@@ -265,6 +282,8 @@ def invite_to_project(
 
     if project.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only the owner can invite members")
+
+    _ensure_team_not_full(project)
 
     invitee = db.query(User).filter(User.email == body.email).first()
     if not invitee:

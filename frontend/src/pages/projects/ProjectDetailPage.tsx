@@ -127,6 +127,7 @@ export default function ProjectDetailPage() {
   const memberList = project.members ?? []
   const ownerInMembers = memberList.some((m) => m.user.id === project.owner.id)
   const teamCount = memberList.length + (ownerInMembers ? 0 : 1)
+  const teamFull = teamCount >= project.team_size
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -248,7 +249,11 @@ export default function ProjectDetailPage() {
                   <div className="flex items-center gap-2 mb-4">
                     <UsersIcon />
                     <h3 className="text-sm font-semibold text-gray-800">Open Roles</h3>
-                    <span className="ml-auto text-xs bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded-full font-semibold">{openRoles.length} open</span>
+                    {teamFull ? (
+                      <span className="ml-auto text-xs bg-gray-100 text-gray-500 border border-gray-200 px-2 py-0.5 rounded-full font-semibold">Team full</span>
+                    ) : (
+                      <span className="ml-auto text-xs bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded-full font-semibold">{openRoles.length} open</span>
+                    )}
                   </div>
                   <div className="space-y-3">
                     {openRoles.map((role) => {
@@ -265,7 +270,9 @@ export default function ProjectDetailPage() {
                             <span className="text-xs text-green-600 font-semibold flex items-center gap-1"><CheckIcon />On team</span>
                           )}
                           {!isOwner && !isMember && !invitedRoleId && (
-                            hasApplied ? (
+                            teamFull ? (
+                              <span className="text-xs font-medium text-gray-400">Team full</span>
+                            ) : hasApplied ? (
                               <span className="text-xs text-green-600 font-semibold flex items-center gap-1"><CheckIcon />Applied!</span>
                             ) : (
                               <button onClick={() => handleApply(role.id)} disabled={isApplying || applyingRoleId !== null}
@@ -381,8 +388,8 @@ export default function ProjectDetailPage() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Open roles</span>
-                    <span className={`font-medium ${openRoles.length > 0 ? "text-green-600" : "text-gray-400"}`}>
-                      {openRoles.length > 0 ? `${openRoles.length} open` : "Team full"}
+                    <span className={`font-medium ${!teamFull && openRoles.length > 0 ? "text-green-600" : "text-gray-400"}`}>
+                      {!teamFull && openRoles.length > 0 ? `${openRoles.length} open` : "Team full"}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">

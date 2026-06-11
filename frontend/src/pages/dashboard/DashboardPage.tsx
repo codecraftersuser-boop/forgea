@@ -342,7 +342,7 @@ export default function DashboardPage() {
                         </div>
                         <div className="flex items-center justify-between text-xs text-gray-500">
                           <span className="flex items-center gap-1"><UsersIcon />{memberCount}/{p.team_size} members</span>
-                          {openCount > 0 && <span className="text-green-600 font-semibold flex items-center gap-1"><UsersIcon />{openCount} open roles</span>}
+                          {openCount > 0 && memberCount < p.team_size && <span className="text-green-600 font-semibold flex items-center gap-1"><UsersIcon />{openCount} open roles</span>}
                         </div>
                         <div className="flex items-center justify-between pt-1 border-t border-gray-50">
                           <div className="flex items-center gap-2">

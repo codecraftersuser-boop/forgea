@@ -187,7 +187,7 @@ export default function ProjectsPage() {
                       </div>
                       <div className="flex items-center justify-between text-xs text-gray-500">
                         <span className="flex items-center gap-1.5"><UsersIcon />{memberCount}/{p.team_size} members</span>
-                        {openCount > 0
+                        {openCount > 0 && memberCount < p.team_size
                           ? <span className="text-green-600 font-semibold flex items-center gap-1"><UsersIcon />{openCount} open roles</span>
                           : <span className="text-gray-400 font-medium">Team full</span>
                         }

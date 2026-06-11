@@ -162,6 +162,7 @@ export default function MyProjectDetailPage() {
   // Owner counts as a team member even if not in the members list
   const ownerInMembers = (project.members ?? []).some((m) => m.user.id === project.owner.id)
   const teamCount = (project.members?.length ?? 0) + (ownerInMembers ? 0 : 1)
+  const teamFull = teamCount >= project.team_size
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -278,10 +279,21 @@ export default function MyProjectDetailPage() {
                   <div className="flex items-center gap-2 mb-4">
                     <UsersIcon />
                     <h3 className="text-sm font-semibold text-gray-800">Open Roles</h3>
-                    <span className="ml-auto text-xs bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded-full font-semibold">
-                      {openRoles.length} open
-                    </span>
+                    {teamFull ? (
+                      <span className="ml-auto text-xs bg-gray-100 text-gray-500 border border-gray-200 px-2 py-0.5 rounded-full font-semibold">
+                        Team full
+                      </span>
+                    ) : (
+                      <span className="ml-auto text-xs bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded-full font-semibold">
+                        {openRoles.length} open
+                      </span>
+                    )}
                   </div>
+                  {teamFull && (
+                    <p className="text-xs text-gray-400 mb-3 -mt-1">
+                      The team has reached its size limit ({project.team_size} members). Increase the team size to invite more people.
+                    </p>
+                  )}
                   <div className="space-y-3">
                     {openRoles.map((role) => (
                       <div key={role.id} className="rounded-lg border border-gray-100 overflow-hidden">
@@ -289,7 +301,9 @@ export default function MyProjectDetailPage() {
                         <div className="flex items-center justify-between px-4 py-3 bg-gray-50">
                           <p className="text-sm font-semibold text-gray-900">{role.role}</p>
                           <div className="flex items-center gap-2">
-                            {inviteSent.includes(role.id) ? (
+                            {teamFull ? (
+                              <span className="text-xs font-medium text-gray-400 px-3 py-1.5">Unavailable</span>
+                            ) : inviteSent.includes(role.id) ? (
                               <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-3 py-1.5 rounded-lg">
                                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                                 Invite sent
@@ -428,8 +442,8 @@ export default function MyProjectDetailPage() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Open roles</span>
-                    <span className={`font-medium ${openRoles.length > 0 ? "text-green-600" : "text-gray-400"}`}>
-                      {openRoles.length > 0 ? `${openRoles.length} open` : "Team full"}
+                    <span className={`font-medium ${!teamFull && openRoles.length > 0 ? "text-green-600" : "text-gray-400"}`}>
+                      {!teamFull && openRoles.length > 0 ? `${openRoles.length} open` : "Team full"}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
