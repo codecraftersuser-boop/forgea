@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.api.v1.routes import auth, users, projects, courses, notifications
+from app.api.v1.routes import auth, users, projects, courses, notifications, search
 
 app = FastAPI(
     title="Forgea API",
@@ -24,6 +24,7 @@ app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
 app.include_router(projects.router, prefix="/api/v1/projects", tags=["projects"])
 app.include_router(courses.router, prefix="/api/v1/courses", tags=["courses"])
 app.include_router(notifications.router, prefix="/api/v1/notifications", tags=["notifications"])
+app.include_router(search.router, prefix="/api/v1/search", tags=["search"])
 
 
 @app.get("/health")

@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import Sidebar from "@/components/layout/Sidebar"
+import SearchBar from "@/components/layout/SearchBar"
 import { useAuthStore } from "@/store/authStore"
 import { useProjects } from "@/hooks/useProjects"
 import { useUnreadCount } from "@/hooks/useNotifications"
@@ -68,10 +69,7 @@ export default function ProjectsPage() {
             <p className="text-xs text-gray-500">Build real-world experience with a team</p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="relative hidden sm:block">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"><SearchIcon /></span>
-              <input type="text" placeholder="Search courses, projects..." className="pl-9 pr-4 py-1.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 w-56" />
-            </div>
+            <SearchBar />
             <Link to="/notifications" className="relative">
               <BellOutlineIcon />
               {unread > 0 && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full" />}
