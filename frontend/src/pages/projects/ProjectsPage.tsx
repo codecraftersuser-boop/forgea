@@ -148,7 +148,7 @@ export default function ProjectsPage() {
               <div className="grid grid-cols-3 gap-4 pb-8">
                 {filtered.map((p, idx) => {
                   const status     = p.status as string
-                  const memberCount = p.members?.length ?? 0
+                  const memberCount = (p.members?.length ?? 0) + (p.members?.some((m: any) => m.user.id === p.owner.id) ? 0 : 1)
                   const openCount   = p.open_roles?.filter((r: any) => !r.is_filled).length ?? 0
                   const lead        = p.owner
                   const leadInitials = lead?.full_name

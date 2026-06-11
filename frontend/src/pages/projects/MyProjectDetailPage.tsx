@@ -159,6 +159,9 @@ export default function MyProjectDetailPage() {
 
   const st = statusConfig[project.status] ?? statusConfig.recruiting
   const openRoles = project.open_roles?.filter((r) => !r.is_filled) ?? []
+  // Owner counts as a team member even if not in the members list
+  const ownerInMembers = (project.members ?? []).some((m) => m.user.id === project.owner.id)
+  const teamCount = (project.members?.length ?? 0) + (ownerInMembers ? 0 : 1)
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -370,9 +373,23 @@ export default function MyProjectDetailPage() {
                 <div className="flex items-center gap-2 mb-4">
                   <UsersIcon />
                   <h3 className="text-sm font-semibold text-gray-800">Team</h3>
-                  <span className="ml-auto text-xs text-gray-400">{project.members?.length ?? 0}/{project.team_size}</span>
+                  <span className="ml-auto text-xs text-gray-400">{teamCount}/{project.team_size}</span>
                 </div>
                 <div className="space-y-3">
+                  {!ownerInMembers && (
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                        {nameInitials(project.owner.full_name)}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate">
+                          {project.owner.full_name}
+                          {project.owner.id === user?.id ? " (you)" : ""}
+                        </p>
+                        <p className="text-xs text-gray-400">Owner</p>
+                      </div>
+                    </div>
+                  )}
                   {project.members?.map((member, idx: number) => (
                     <div key={member.user.id} className="flex items-center gap-3">
                       <div className={`w-8 h-8 rounded-full ${AVATAR_COLORS[idx % AVATAR_COLORS.length]} flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}>
@@ -407,7 +424,7 @@ export default function MyProjectDetailPage() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Team size</span>
-                    <span className="text-gray-800 font-medium">{project.members?.length ?? 0}/{project.team_size} members</span>
+                    <span className="text-gray-800 font-medium">{teamCount}/{project.team_size} members</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Open roles</span>

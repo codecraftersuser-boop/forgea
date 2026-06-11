@@ -310,7 +310,7 @@ export default function DashboardPage() {
                 <div className="grid grid-cols-2 gap-4">
                   {projects.filter((p) => p.status === "recruiting").slice(0, 2).map((p, idx) => {
                     const avatarColors = levelColors
-                    const memberCount = p.members?.length ?? 0
+                    const memberCount = (p.members?.length ?? 0) + (p.members?.some((m) => m.user.id === p.owner.id) ? 0 : 1)
                     const openCount   = p.open_roles?.filter((r) => !r.is_filled).length ?? 0
                     const lead        = p.members?.[0]?.user ?? p.owner
                     const leadInitials = lead?.full_name

@@ -167,7 +167,7 @@ export default function MyProjectsPage() {
                       </div>
 
                       <div className="flex items-center justify-between text-xs text-gray-500">
-                        <span className="flex items-center gap-1.5"><UsersIcon />{p.members?.length ?? 0}/{p.team_size} members</span>
+                        <span className="flex items-center gap-1.5"><UsersIcon />{(p.members?.length ?? 0) + (p.members?.some((m: any) => m.user.id === p.owner.id) ? 0 : 1)}/{p.team_size} members</span>
                         {openRoles > 0
                           ? <span className="text-green-600 font-semibold flex items-center gap-1"><UsersIcon />{openRoles} open roles</span>
                           : <span className="text-gray-400 font-medium">Team full</span>
