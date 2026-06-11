@@ -104,6 +104,7 @@ export default function RoadmapPage() {
   const [activeFilter, setActiveFilter]   = useState("All")
   const [sortBy, setSortBy]               = useState("rating")
   const [showSortMenu, setShowSortMenu]   = useState(false)
+  const [courseSearch, setCourseSearch]   = useState("")
   // key = "stageIdx-reqLabel", value = expanded
   const [expandedReq, setExpandedReq]     = useState<string | null>(null)
 
@@ -122,7 +123,15 @@ export default function RoadmapPage() {
   const completedCourses   = myCourses.filter((c) => !!c.completed_at)
   const inProgressCourses  = myCourses.filter((c) => !c.completed_at)
 
-  const sortedCourses = sortCourses(allCourses, sortBy)
+  const searchLower = courseSearch.trim().toLowerCase()
+  const filteredCourses = searchLower
+    ? allCourses.filter((c) =>
+        c.title.toLowerCase().includes(searchLower) ||
+        c.institution.toLowerCase().includes(searchLower) ||
+        (c.instructor ?? "").toLowerCase().includes(searchLower)
+      )
+    : allCourses
+  const sortedCourses = sortCourses(filteredCourses, sortBy)
   const currentSortLabel = sortOptions.find((o) => o.value === sortBy)?.label ?? "Sort"
 
   const initials = user?.full_name
@@ -469,6 +478,28 @@ export default function RoadmapPage() {
               </div>
             </div>
 
+            {/* Course name search */}
+            <div className="relative flex-1 max-w-xs mx-4">
+              <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                value={courseSearch}
+                onChange={(e) => setCourseSearch(e.target.value)}
+                placeholder="Search course by name..."
+                className="w-full pl-9 pr-8 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              />
+              {courseSearch && (
+                <button
+                  onClick={() => setCourseSearch("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm leading-none"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
             {/* Sort dropdown */}
             <div className="relative">
               <button
@@ -501,7 +532,11 @@ export default function RoadmapPage() {
             </div>
           ) : sortedCourses.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-200">
-              <p className="text-gray-400">No courses found for this path and level.</p>
+              <p className="text-gray-400">
+                {searchLower
+                  ? `No courses match "${courseSearch.trim()}" for this path and level.`
+                  : "No courses found for this path and level."}
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-4 pb-6">

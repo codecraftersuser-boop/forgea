@@ -83,9 +83,12 @@ export default function SearchBar() {
             <div>
               <p className="px-4 pt-3 pb-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">📚 Courses</p>
               {data.courses.map((c) => (
-                <button
+                <a
                   key={c.id}
-                  onClick={() => { closeAndReset(); navigate("/roadmap") }}
+                  href={c.external_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={closeAndReset}
                   className="w-full text-left px-4 py-2 hover:bg-indigo-50 transition-colors flex items-center justify-between gap-2"
                 >
                   <div className="min-w-0">
@@ -95,7 +98,7 @@ export default function SearchBar() {
                   <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0 capitalize ${levelColors[c.level] ?? "text-gray-500 bg-gray-100"}`}>
                     {c.level}
                   </span>
-                </button>
+                </a>
               ))}
             </div>
           )}
