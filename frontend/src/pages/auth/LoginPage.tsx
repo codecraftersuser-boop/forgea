@@ -4,6 +4,7 @@ import Button from "@/components/ui/Button"
 import Input from "@/components/ui/Input"
 import logo from "@/assets/logo.png"
 import heroImage from "@/assets/login_image.jpg"
+import { useAuthStore } from "@/store/authStore"
 
 function GoogleIcon() {
   return (
@@ -36,23 +37,25 @@ type Mode = "login" | "register"
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const { login, register, isLoading: loading, error: authError, clearError } = useAuthStore()
   const [mode, setMode] = useState<Mode>("login")
-  const [loading, setLoading] = useState(false)
+  const switchMode = (m: Mode) => { setMode(m); setErrors({}); clearError() }
   const [form, setForm] = useState({ name: "", email: "", password: "" })
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
     setErrors((prev) => ({ ...prev, [e.target.name]: "" }))
+    clearError()
   }
 
   const validate = () => {
     const errs: Record<string, string> = {}
-    if (mode === "register" && !form.name.trim()) errs.name = "El nombre es requerido"
-    if (!form.email.trim()) errs.email = "El email es requerido"
-    else if (!/\S+@\S+\.\S+/.test(form.email)) errs.email = "Email inválido"
-    if (!form.password) errs.password = "La contraseña es requerida"
-    else if (form.password.length < 6) errs.password = "Mínimo 6 caracteres"
+    if (mode === "register" && !form.name.trim()) errs.name = "Full name is required"
+    if (!form.email.trim()) errs.email = "Email is required"
+    else if (!/\S+@\S+\.\S+/.test(form.email)) errs.email = "Invalid email address"
+    if (!form.password) errs.password = "Password is required"
+    else if (form.password.length < 6) errs.password = "Minimum 6 characters"
     return errs
   }
 
@@ -60,11 +63,17 @@ export default function LoginPage() {
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length) { setErrors(errs); return }
-    setLoading(true)
-    await new Promise((r) => setTimeout(r, 1000))
-    setLoading(false)
-    if (mode === "register") navigate("/onboarding")
-    else navigate("/dashboard")
+    try {
+      if (mode === "register") {
+        await register({ email: form.email, password: form.password, full_name: form.name })
+        navigate("/onboarding")
+      } else {
+        await login({ email: form.email, password: form.password })
+        navigate("/dashboard")
+      }
+    } catch {
+      // error ya está en authError del store
+    }
   }
 
   return (
@@ -220,6 +229,16 @@ export default function LoginPage() {
               )}
             </div>
 
+            {/* Error del servidor */}
+            {authError && (
+              <div className="flex items-start gap-2 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                <span>{authError}</span>
+              </div>
+            )}
+
             <Button type="submit" variant="primary" size="lg" loading={loading} className="w-full mt-2">
               {mode === "login" ? "Sign in" : "Create account"}
             </Button>
@@ -230,14 +249,14 @@ export default function LoginPage() {
             {mode === "login" ? (
               <>
                 New to Forgea?{" "}
-                <button onClick={() => setMode("register")} className="text-indigo-600 hover:text-indigo-700 font-medium">
+                <button onClick={() => switchMode("register")} className="text-indigo-600 hover:text-indigo-700 font-medium">
                   Create an account
                 </button>
               </>
             ) : (
               <>
                 Already have an account?{" "}
-                <button onClick={() => setMode("login")} className="text-indigo-600 hover:text-indigo-700 font-medium">
+                <button onClick={() => switchMode("login")} className="text-indigo-600 hover:text-indigo-700 font-medium">
                   Sign in
                 </button>
               </>

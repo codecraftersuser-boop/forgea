@@ -1,5 +1,5 @@
 from datetime import datetime, date
-from sqlalchemy import String, Integer, Float, DateTime, Date, ForeignKey, Text
+from sqlalchemy import String, Integer, Float, DateTime, Date, ForeignKey, Text, ARRAY
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -22,6 +22,7 @@ class Course(Base):
     external_url: Mapped[str] = mapped_column(String(500))
     thumbnail_url: Mapped[str | None] = mapped_column(String(500))
     last_updated: Mapped[date] = mapped_column(Date)
+    tags: Mapped[list[str]] = mapped_column(ARRAY(String), default=list, server_default="{}")
 
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 

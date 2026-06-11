@@ -29,7 +29,7 @@ class Project(Base):
     title: Mapped[str] = mapped_column(String(255))
     description: Mapped[str] = mapped_column(Text)
     career_path: Mapped[str] = mapped_column(String(50))
-    status: Mapped[ProjectStatus] = mapped_column(Enum(ProjectStatus), default=ProjectStatus.recruiting)
+    status: Mapped[str] = mapped_column(String(20), default="recruiting")
     progress: Mapped[int] = mapped_column(Integer, default=0)
     team_size: Mapped[int] = mapped_column(Integer, default=4)
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
@@ -71,7 +71,7 @@ class ProjectRole(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
-    role: Mapped[RoleType] = mapped_column(Enum(RoleType))
+    role: Mapped[str] = mapped_column(String(100))
     is_filled: Mapped[bool] = mapped_column(default=False)
 
     project: Mapped["Project"] = relationship(back_populates="open_roles")

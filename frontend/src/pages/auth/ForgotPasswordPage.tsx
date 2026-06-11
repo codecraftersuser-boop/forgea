@@ -4,6 +4,7 @@ import Button from "@/components/ui/Button"
 import Input from "@/components/ui/Input"
 import logo from "@/assets/logo.png"
 import heroImage from "@/assets/login_image.jpg"
+import { authService } from "@/services/authService"
 
 function CheckIcon() {
   return (
@@ -39,12 +40,17 @@ export default function ForgotPasswordPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email.trim()) { setError("El email es requerido"); return }
-    if (!/\S+@\S+\.\S+/.test(email)) { setError("Email inválido"); return }
+    if (!email.trim()) { setError("Email is required"); return }
+    if (!/\S+@\S+\.\S+/.test(email)) { setError("Invalid email address"); return }
     setLoading(true)
-    await new Promise((r) => setTimeout(r, 1000))
-    setLoading(false)
-    setStep("sent")
+    try {
+      await authService.forgotPassword({ email })
+    } catch {
+      // Always show "sent" to prevent user enumeration
+    } finally {
+      setLoading(false)
+      setStep("sent")
+    }
   }
 
   return (

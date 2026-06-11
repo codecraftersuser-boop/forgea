@@ -45,5 +45,21 @@ services:
       - /app/node_modules
     command: npm run dev -- --host
 
+  # Run once to seed courses, then exits. Re-run manually or via cron:
+  #   docker-compose run --rm scraper
+  #   docker-compose run --rm scraper python -m scraper.run --sources "Kaggle Learn" "freeCodeCamp"
+  scraper:
+    build: ./scraper
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://forgea:forgea@db:5432/forgea_db
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./scraper:/app
+    profiles:
+      - scraper  # won't start with `docker-compose up`, only with --profile scraper
+
 volumes:
   postgres_data:

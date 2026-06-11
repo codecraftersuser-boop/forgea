@@ -84,7 +84,9 @@ export interface Course {
   external_url: string
   thumbnail_url?: string
   last_updated: string
+  tags?: string[]
   progress?: number
+  completed_at?: string | null
 }
 
 export interface Notification {
