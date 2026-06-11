@@ -1,4 +1,6 @@
+from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -37,6 +39,62 @@ def list_courses(
         q = q.filter(Course.prestige_score >= min_prestige)
     courses = q.order_by(Course.prestige_score.desc()).offset(skip).limit(limit).all()
     return [CourseOut.model_validate(c) for c in courses]
+
+
+@router.get("/activity")
+def course_activity(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return weekly enrollment and completion counts for the last 8 weeks."""
+    now = datetime.utcnow()
+    # Anchor to the Monday of the current week, then go back 7 weeks so W8 = this week
+    current_monday = now - timedelta(days=now.weekday())
+    current_monday = current_monday.replace(hour=0, minute=0, second=0, microsecond=0)
+    start = current_monday - timedelta(weeks=7)
+
+    enrollments = (
+        db.query(
+            func.date_trunc("week", UserCourse.enrolled_at).label("week"),
+            func.count().label("count"),
+        )
+        .filter(UserCourse.user_id == current_user.id, UserCourse.enrolled_at >= start)
+        .group_by("week")
+        .all()
+    )
+
+    completions = (
+        db.query(
+            func.date_trunc("week", UserCourse.completed_at).label("week"),
+            func.count().label("count"),
+        )
+        .filter(
+            UserCourse.user_id == current_user.id,
+            UserCourse.completed_at.isnot(None),
+            UserCourse.completed_at >= start,
+        )
+        .group_by("week")
+        .all()
+    )
+
+    # Build a map of ISO week string → counts
+    enroll_map = {r.week.strftime("%Y-%W"): r.count for r in enrollments if r.week}
+    complete_map = {r.week.strftime("%Y-%W"): r.count for r in completions if r.week}
+
+    # Generate 8 week buckets
+    weeks = []
+    for i in range(8):
+        week_start = start + timedelta(weeks=i)
+        key = week_start.strftime("%Y-%W")
+        label = f"W{i + 1}"
+        weeks.append({
+            "label": label,
+            "week_start": week_start.strftime("%Y-%m-%d"),
+            "enrollments": enroll_map.get(key, 0),
+            "completions": complete_map.get(key, 0),
+        })
+
+    return weeks
 
 
 @router.get("/my", response_model=list[CourseOut])

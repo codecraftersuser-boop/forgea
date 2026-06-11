@@ -1,6 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "react-query"
 import { coursesService, type CourseFilters } from "@/services/coursesService"
 
+export function useCourseActivity() {
+  return useQuery("courseActivity", () => coursesService.activity(), { staleTime: 60_000 })
+}
+
 export function useCourses(filters: CourseFilters = {}) {
   return useQuery(
     ["courses", filters],

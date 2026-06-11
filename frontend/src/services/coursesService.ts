@@ -31,4 +31,16 @@ export const coursesService = {
   async updateProgress(courseId: number, progress: number): Promise<void> {
     await api.patch(`/api/v1/courses/${courseId}/progress`, { progress })
   },
+
+  async activity(): Promise<WeeklyActivity[]> {
+    const res = await api.get<WeeklyActivity[]>("/api/v1/courses/activity")
+    return res.data
+  },
+}
+
+export interface WeeklyActivity {
+  label: string
+  week_start: string
+  enrollments: number
+  completions: number
 }

@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom"
 import Sidebar from "@/components/layout/Sidebar"
 import { useAuthStore } from "@/store/authStore"
-import { useMyCourses } from "@/hooks/useCourses"
+import { useMyCourses, useCourseActivity } from "@/hooks/useCourses"
 import { useProjects } from "@/hooks/useProjects"
 import { useUnreadCount } from "@/hooks/useNotifications"
 import { computeStages } from "@/lib/roadmapStages"
+import type { WeeklyActivity } from "@/services/coursesService"
 
 // ── Icons ─────────────────────────────────────────────────
 function SearchIcon()       { return <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg> }
@@ -27,39 +28,96 @@ function AchCollaborator()  { return <svg className="w-5 h-5 text-white" fill="n
 function AchPolyglot()      { return <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" /></svg> }
 
 // ── Area Chart ────────────────────────────────────────────
-function AreaChart() {
-  const data = [18, 22, 20, 28, 32, 35, 30, 38, 42, 45, 40, 48, 52, 55, 58, 60, 56, 62, 65, 70, 68, 74, 72, 78]
+function AreaChart({ weeks }: { weeks: WeeklyActivity[] }) {
   const w = 800; const h = 160
-  const max = Math.max(...data); const min = Math.min(...data) - 5
-  const pts = data.map((v, i) => {
-    const x = (i / (data.length - 1)) * w
-    const y = h - ((v - min) / (max - min)) * (h - 20) - 10
+  const values = weeks.map((wk) => wk.enrollments + wk.completions)
+  const hasActivity = values.some((v) => v > 0)
+
+  if (!hasActivity) {
+    return (
+      <div className="flex flex-col items-center justify-center h-40 text-gray-400 gap-2">
+        <svg className="w-8 h-8 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.5l4.5-4.5 3 3 4.5-6 3 3" />
+        </svg>
+        <p className="text-sm">No activity yet — enroll in a course to start tracking</p>
+      </div>
+    )
+  }
+
+  const max = Math.max(...values, 1)
+  const pts = values.map((v, i) => {
+    const x = values.length > 1 ? (i / (values.length - 1)) * w : w / 2
+    const y = h - (v / max) * (h - 24) - 12
     return [x, y] as [number, number]
   })
-  const d = pts.reduce((acc, [x, y], i) => {
+  const linePath = pts.reduce((acc, [x, y], i) => {
     if (i === 0) return `M ${x},${y}`
     const [px, py] = pts[i - 1]
     const cpx = (px + x) / 2
     return `${acc} C ${cpx},${py} ${cpx},${y} ${x},${y}`
   }, "")
-  const area = `${d} L ${w},${h} L 0,${h} Z`
+  const areaPath = `${linePath} L ${w},${h} L 0,${h} Z`
+
+  // Bar data for completions overlay
+  const barW = w / values.length - 4
+
   return (
     <div className="relative">
-      <svg viewBox={`0 0 ${w} ${h}`} className="w-full" style={{ height: 160 }} preserveAspectRatio="none">
+      {/* Legend */}
+      <div className="flex items-center gap-4 mb-3 text-xs text-gray-500">
+        <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 bg-indigo-500 inline-block rounded" />Enrolled</span>
+        <span className="flex items-center gap-1.5"><span className="w-3 h-3 bg-green-400 opacity-70 inline-block rounded-sm" />Completed</span>
+      </div>
+      <svg viewBox={`0 0 ${w} ${h}`} className="w-full" style={{ height: 140 }} preserveAspectRatio="none">
         <defs>
           <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#6366f1" stopOpacity="0.25" />
+            <stop offset="0%" stopColor="#6366f1" stopOpacity="0.18" />
             <stop offset="100%" stopColor="#6366f1" stopOpacity="0.02" />
           </linearGradient>
         </defs>
+        {/* Grid lines */}
         {[0.25, 0.5, 0.75].map((t) => (
           <line key={t} x1="0" y1={h * t} x2={w} y2={h * t} stroke="#e5e7eb" strokeWidth="1" />
         ))}
-        <path d={area} fill="url(#areaGrad)" />
-        <path d={d} fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        {/* Completion bars */}
+        {weeks.map((wk, i) => {
+          const barH = (wk.completions / max) * (h - 24)
+          const x = values.length > 1 ? (i / (values.length - 1)) * w : w / 2
+          return barH > 0 ? (
+            <rect
+              key={i}
+              x={x - barW / 2}
+              y={h - barH}
+              width={barW}
+              height={barH}
+              fill="#4ade80"
+              opacity={0.4}
+              rx={3}
+            />
+          ) : null
+        })}
+        {/* Enrollment area + line */}
+        <path d={areaPath} fill="url(#areaGrad)" />
+        <path d={linePath} fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        {/* Dots */}
+        {pts.map(([x, y], i) => (
+          values[i] > 0 && <circle key={i} cx={x} cy={y} r="4" fill="#6366f1" stroke="white" strokeWidth="2" />
+        ))}
       </svg>
+      {/* X axis labels + tooltips */}
       <div className="flex justify-between px-1 mt-1">
-        {["W2","W3","W4","W5","W6","W7","W8"].map((wk) => <span key={wk} className="text-xs text-gray-400">{wk}</span>)}
+        {weeks.map((wk) => (
+          <div key={wk.label} className="flex flex-col items-center gap-0.5 group relative">
+            <span className="text-xs text-gray-400">{wk.label}</span>
+            {/* Tooltip on hover */}
+            {(wk.enrollments > 0 || wk.completions > 0) && (
+              <div className="absolute bottom-5 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
+                {wk.enrollments > 0 && <div>+{wk.enrollments} enrolled</div>}
+                {wk.completions > 0 && <div>✓ {wk.completions} completed</div>}
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   )
@@ -71,6 +129,7 @@ export default function DashboardPage() {
   const { user } = useAuthStore()
   const { data: myCourses = [] } = useMyCourses()
   const { data: projects = [] } = useProjects()
+  const { data: activityWeeks = [] } = useCourseActivity()
   const unread = useUnreadCount()
 
   const firstName = user?.full_name?.split(" ")[0] ?? "there"
@@ -150,18 +209,39 @@ export default function DashboardPage() {
           <div className="flex-1 min-w-0 overflow-y-auto px-8 py-5 space-y-5">
 
             {/* Area chart */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h2 className="text-sm font-bold text-gray-900">Learning Activity</h2>
-                  <p className="text-xs text-gray-500 mt-0.5">Hours studied over the last 8 weeks</p>
+            {(() => {
+              const totalEnrolled   = activityWeeks.reduce((s, w) => s + w.enrollments, 0)
+              const totalCompleted  = activityWeeks.reduce((s, w) => s + w.completions, 0)
+              // Compare last 4 weeks vs prior 4 weeks for the trend badge
+              const recent = activityWeeks.slice(4).reduce((s, w) => s + w.enrollments + w.completions, 0)
+              const prior  = activityWeeks.slice(0, 4).reduce((s, w) => s + w.enrollments + w.completions, 0)
+              const trendPct = prior > 0 ? Math.round(((recent - prior) / prior) * 100) : null
+              return (
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h2 className="text-sm font-bold text-gray-900">Learning Activity</h2>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Course enrollments &amp; completions — last 8 weeks
+                        {totalEnrolled > 0 && (
+                          <span className="ml-2 text-gray-700 font-medium">
+                            {totalEnrolled} enrolled · {totalCompleted} completed
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                    {trendPct !== null && (
+                      <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full ${
+                        trendPct >= 0 ? "text-green-600 bg-green-50" : "text-red-500 bg-red-50"
+                      }`}>
+                        <TrendUpSmIcon />{trendPct >= 0 ? "+" : ""}{trendPct}% vs prev 4 weeks
+                      </span>
+                    )}
+                  </div>
+                  <AreaChart weeks={activityWeeks} />
                 </div>
-                <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-full">
-                  <TrendUpSmIcon />+18% vs last month
-                </span>
-              </div>
-              <AreaChart />
-            </div>
+              )
+            })()}
 
             {/* Continue Learning */}
             <div>
