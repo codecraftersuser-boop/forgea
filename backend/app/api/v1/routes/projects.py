@@ -112,6 +112,12 @@ def create_project(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    # Capacity check: owner takes one slot, each open role takes one
+    if len(body.open_roles) + 1 > body.team_size:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Team size ({body.team_size}) is too small for {len(body.open_roles)} open roles plus the owner",
+        )
     project = Project(
         title=body.title,
         description=body.description,
